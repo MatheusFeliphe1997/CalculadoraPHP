@@ -154,7 +154,7 @@ if (isset($_POST['calculate'])) {
     echo "<input type='text' value='$result' readonly>";
 }
 
-if (isset($_POST['clearHistory'])) {
+if (isset($_POST['apagarHistorico'])) {
     unset($_SESSION['historico']);
 }
 
@@ -181,7 +181,7 @@ function fatorial($num)
                 <?php endif; ?>
             </ul>
             <form method="post" action="">
-                <button type="submit" name="clearHistory">Apagar Histórico</button>
+                <button type="submit" name="apagarHistorico">Apagar Histórico</button>
             </form>
         </div>
     </div>
