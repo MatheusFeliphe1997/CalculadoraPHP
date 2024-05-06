@@ -5,70 +5,161 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-    .calculator h1 {
-        margin-bottom: 20px;
-        text-align: center;
-    }
+        .calculadora {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            margin: 0 auto;
+        }
 
-    input[type="text"],
-    select,
-    button {
-        margin-bottom: 10px;
-        padding: 8px;
-        width: calc(100% - 20px);
-    }
+        .calculadora h1 {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            text-align: center;
+            color: #333;
+            border-bottom: 2px solid #ccc;
+        }
 
-    button {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
+        .calculadora h3 {
+            margin-top: 5px;
+            text-align: center;
+            color: #666;
+        }
 
+        input[type="text"],
+        select,
+        button {
+            margin-bottom: 10px;
+            padding: 10px;
+            width: calc(100% - 20px);
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
 
-    button:hover {
-        background-color: #45a049;
-    }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
 
-    body {
-        background-color: gray;
-    }
+        button:hover {
+            background-color: #45a049;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            font-family: Arial, sans-serif;
+        }
+
+        .historico {
+            background-color: #e0e0e0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .historico input[type="text"] {
+            width: 100%;
+            margin-bottom: 5px;
+            padding: 5px;
+            box-sizing: border-box;
+            border: none;
+            background-color: #ccc;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .historico ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .historico li {
+            margin-bottom: 5px;
+            padding: 5px;
+            background-color: #d3d3d3;
+            border-radius: 5px;
+        }
     </style>
     <title>Calculadora</title>
 </head>
 
 <body>
-    <div class="calculator">
+    <div class="calculadora">
         <h1>Calculadora PHP</h1>
+        <h3>Alunos: Gabriel Couto, Kayc Chauchuti, Matheus Dias</h3>
         <form method="post" action="">
-            <input type="text" name="num1" placeholder="Número 1">
-            <select name="operator">
-                <option value="+">+</option>
-                <option value="-">-</option>
-                <option value="*">*</option>
-                <option value="/">/</option>
-                <option value="^">^</option>
-                <option value="!">!</option>
-            </select>
-            <input type="text" name="num2" placeholder="Número 2">
+            <div class="operacoes">
+                <input type="text" name="n1" placeholder="Número 1">
+                <select name="operator">
+                    <option value="+">+</option>
+                    <option value="-">-</option>
+                    <option value="*">*</option>
+                    <option value="/">/</option>
+                    <option value="^">^</option>
+                    <option value="!">!</option>
+                </select>
+                <input type="text" name="n2" placeholder="Número 2">
+            </div>
             <button type="submit" name="calculate">Calcular</button>
+            <button type="button" onclick="retrieveFromMemory()">Memória</button>
         </form>
-
-        <input type="text" name="result" value="<?php
-            $num1 = $_POST['num1'];
-            $operador = $_POST['operator'];
-            $num2 = $_POST['num2'];
-            $resultado = $_POST['result'];
-
-            echo $num1 . " " . $operador . " " . $num2 . " = " . $resultado;
-?>">
 
         <?php
 session_start();
 
-// Função para calcular fatorial
-function factorial($num) {
+if (isset($_POST['calculate'])) {
+    $num1 = isset($_POST['n1']) ? $_POST['n1'] : '';
+    $num2 = isset($_POST['n2']) ? $_POST['n2'] : '';
+    $operator = isset($_POST['operator']) ? $_POST['operator'] : '+';
+
+    
+    if (empty($num1) || ($operator !== '!' && empty($num2))) {
+        $result = 'Por favor, preencha todos os campos obrigatórios.';
+    } else {
+        
+        if ($operator == '/' && $num2 == 0) {
+            $result = 'Divisão por zero não é permitida';
+        } else {
+            switch ($operator) {
+                case '+':
+                    $result = $num1 + $num2;
+                    break;
+                case '-':
+                    $result = $num1 - $num2;
+                    break;
+                case '*':
+                    $result = $num1 * $num2;
+                    break;
+                case '/':
+                    $result = $num1 / $num2;
+                    break;
+                case '^':
+                    $result = pow($num1, $num2);
+                    break;
+                case '!':
+                    $result = fatorial($num1);
+                    break;
+                default:
+                    $result = 'Operador inválido';
+            }
+        }
+    }
+
+    $_SESSION['historico'][] = "$num1 $operator $num2 = $result";
+    echo "<input type='text' value='$result' readonly>";
+}
+
+if (isset($_POST['clearHistory'])) {
+    unset($_SESSION['historico']);
+}
+
+function fatorial($num)
+{
     if ($num === 0 || $num === 1)
         return 1;
     for ($i = $num - 1; $i >= 1; $i--) {
@@ -76,69 +167,37 @@ function factorial($num) {
     }
     return $num;
 }
-
-if (isset($_POST['calculate'])) {
-    $num1 = isset($_POST['num1']) ? $_POST['num1'] : 0;
-    $num2 = isset($_POST['num2']) ? $_POST['num2'] : 0;
-    $operator = isset($_POST['operator']) ? $_POST['operator'] : '+';
-
-    switch($operator) {
-        case '+':
-            $result = $num1 + $num2;
-            break;
-        case '-':
-            $result = $num1 - $num2;
-            break;
-        case '*':
-            $result = $num1 * $num2;
-            break;
-        case '/':
-            $result = $num1 / $num2;
-            break;
-        case '^':
-            $result = pow($num1, $num2);
-            break;
-        case '!':
-            $result = factorial($num1);
-            break;
-        default:
-            $result = 'Operador inválido';
-    }
-
-    // Salvando o histórico
-    $_SESSION['history'][] = "$num1 $operator $num2 = $result";
-}
-
-// Botão de memória
-if (isset($_POST['memory'])) {
-    $_SESSION['memory'] = array(
-        'num1' => isset($_POST['num1']) ? $_POST['num1'] : 0,
-        'operator' => isset($_POST['operator']) ? $_POST['operator'] : '+',
-        'num2' => isset($_POST['num2']) ? $_POST['num2'] : 0
-    );
-}
-
-// Resgatando valores da memória
-if (isset($_POST['retrieve']) && isset($_SESSION['memory'])) {
-    $num1 = $_SESSION['memory']['num1'];
-    $operator = $_SESSION['memory']['operator'];
-    $num2 = $_SESSION['memory']['num2'];
-}
 ?>
-        <div class=" history">
+
+
+
+        <div class="historico">
             <input type="text" value="HISTÓRICO" readonly>
             <ul>
-                <?php if (isset($_SESSION['history'])): ?>
-                <?php foreach ($_SESSION['history'] as $operation): ?>
-                <li><?php echo $operation; ?></li>
-                <?php endforeach; ?>
+                <?php if (isset($_SESSION['historico'])): ?>
+                    <?php foreach ($_SESSION['historico'] as $operation): ?>
+                        <li><?php echo $operation; ?></li>
+                    <?php endforeach; ?>
                 <?php endif; ?>
             </ul>
             <form method="post" action="">
                 <button type="submit" name="clearHistory">Apagar Histórico</button>
             </form>
         </div>
+    </div>
 
+    <script>
+        function retrieveFromMemory() {
+            var historico = <?php echo json_encode($_SESSION['historico'] ?? null); ?>;
+            if (historico && historico.length > 0) {
+                var lastOperation = historico[historico.length - 1];
+                var parts = lastOperation.split(" ");
+                document.querySelector('input[name="n1"]').value = parts[0];
+                document.querySelector('select[name="operator"]').value = parts[1];
+                document.querySelector('input[name="n2"]').value = parts[2];
+            }
+        }
+    </script>
 </body>
 
 </html>
